@@ -1,0 +1,13 @@
+doc.md
+.env
+doc_folder/
+test*
+
+bot.ipynb
+db.ipynb
+repo-gpt_persist_test2
+
+*ipynb
+
+.DS_Store
+__pycache__/
