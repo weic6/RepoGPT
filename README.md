@@ -10,16 +10,11 @@ RepoGPT allows users to analyze and interact with GitHub repositories by crawlin
 
 # Key Features
 
-- Developed RepoGPT, an advanced AI-powered chatbot for analyzing and interacting with GitHub repositories.
+- Developed an advanced AI-powered chatbot for analyzing and interacting with GitHub repositories to enhanced secondary application development by providing quick and insightful access to open source codebases.
 - Implemented repository crawling using the GitHub API to retrieve files efficiently.
 - Leveraged Retrieval-Augmented Generation (RAG) to enable insightful conversations with repository content.
 - Utilized Streamlit for the user interface, providing an intuitive and interactive experience for users.
 - Integrated Chroma vector store for managing and querying vectorized content from repositories.
-- Ensured efficient data processing by excluding irrelevant files, focusing on meaningful content.
-- Overcame challenges in handling various file types and optimizing vectorization for large repositories.
-- Enhanced secondary application development by providing quick and insightful access to open source codebases.
-- Collaborated with a cross-functional team to integrate language processing capabilities using the LangChain library.
-- Continuously improved the application's performance and accuracy based on user feedback and iterative testing.
 
 ## Run guide
 
