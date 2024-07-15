@@ -1,12 +1,12 @@
 # RepoGPT
 
-RepoGPT is an intuitive and powerful chatbot, that users can interact with and gain insights from their provided GitHub repositories. This chatboot significantly speeds up the learning curve for secondary application development based on open source repository.
+RepoGPT is an intuitive and powerful chatbot, which everages the power of Large Language Model (LLM) and Retrieval-Augmented Generation (RAG) for interacting with GitHub repositories, and assist developer to understand the codes better and faster. This chatboot significantly speeds up the learning curve for secondary application development based on open source repository.
 
 # Overview
 
 The backend uses the GitHub API for retrieving repository documents, the LangChain library to simplify the creation of the chatbot, and the Chroma vector store for managing and querying vectorized content, and OpenAI API to empower interactions with users. The frontend uses Streamlit to create an interactive interface.
 
-RepoGPT allows users to analyze and interact with GitHub repositories by crawling documents, then vectorizing the content for retrieval-augmented generation. Users can chat with the repository to get insights and answers about its contents. It leverages the power of Large Language Model (LLM) and Retrieval-Augmented Generation (RAG) for interacting with GitHub repositories, and assist developer to understand the codes better and faster.
+Upon receiving the github repository url, RepoGPT will crawl documents inside the repository, and vectorize the content and stored in Chrome, for retrieval-augmented generation. Users can then chat with the repository to get insights and .
 
 # Key Features
 
