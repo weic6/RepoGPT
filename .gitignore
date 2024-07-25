@@ -11,3 +11,4 @@ repo-gpt_persist_test2
 
 .DS_Store
 __pycache__/
+_chroma/

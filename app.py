@@ -1,3 +1,9 @@
+__import__("pysqlite3")
+import pysqlite3
+import sys
+
+sys.modules["sqlite3"] = sys.modules["pysqlite3"]
+import chromadb
 import streamlit as st
 import os
 from crawl import *
@@ -9,7 +15,7 @@ load_dotenv(find_dotenv())
 
 github_token = os.getenv("GITHUB_TOKEN")
 openai_api_key = os.getenv("OPENAI_API_KEY")
-persist_directory = os.getenv("CHROMA_DIR")
+# persist_directory = os.getenv("CHROMA_DIR")
 
 
 def main():
@@ -39,18 +45,24 @@ def main():
             "Chat with GPT, RAG and Memory",
         ],
     )
-
-    repo_url = st.sidebar.text_input(
-        "Github Repository URL", help="https://github.com/user/repo"
+    # example_repo_path = "/home/dtvi/Documents/wei/RepoGPT"
+    example_repo_path = (
+        "/home/dtvi/projects/repository/mtl-dpdk/Media-Transport-Library"
     )
-    if not repo_url:
-        st.warning("Please enter Github Repository URL.")
+    repo_path = st.sidebar.text_input(
+        "Enter your local repository path...",
+        value=example_repo_path,
+    )
+    if not repo_path:
+        st.warning("Please enter local repository path.")
         return
 
-    owner, repo = extract_owner_repo(repo_url)
-    st.sidebar.write(f"Owner: {owner}, Repo: {repo}")
+    # owner, repo = extract_owner_repo(repo_path)
+    # st.sidebar.write(f"Owner: {owner}, Repo: {repo}")
+    # file_paths = crawl_repo(owner, repo, github_token)
 
-    file_paths = crawl_repo(owner, repo, github_token)
+    file_paths = crawl_local_repo(repo_path, rel_path=True)
+
     st.sidebar.write(f"Found {len(file_paths)} files.")
 
     if st.sidebar.button("List All Files"):
@@ -60,14 +72,27 @@ def main():
             st.session_state["show_files"] = not st.session_state["show_files"]
     if st.session_state.get("show_files", False):
         for file_path in file_paths:
-            st.sidebar.write(f"https://github.com/{owner}/{repo}/blob/main/{file_path}")
+            # st.sidebar.write(f"https://github.com/{owner}/{repo}/blob/main/{file_path}")
+            st.sidebar.write(file_path)
 
-    if st.sidebar.button("Confirm Vectorization"):
+    if st.sidebar.button("Select persist chroma db"):
+        if persist_directory := st.sidebar.text_input("Directory to chroma db"):
+            st.session_state["persist_directory"] = persist_directory
+            vectordb = load_vector_db(
+                openai_api_key,
+                st.session_state["persist_directory"],
+            )
+            st.sidebar.write("Chroma db loaded successfully!")
+            st.session_state["vectordb"] = vectordb
+    elif st.sidebar.button("Create persist chroma db"):
+        st.session_state["persist_directory"] = os.path.join(repo_path, "_chroma")
         st.sidebar.write("Vectorizing the documents...")
         vectordb = get_vectordb(
-            openai_api_key, owner, repo, github_token, persist_directory
+            openai_api_key,
+            repo_path,
+            st.session_state["persist_directory"],
         )
-        st.sidebar.write("Vectorization complete.")
+        st.sidebar.write("Chroma db created successfully!")
         st.session_state["vectordb"] = vectordb
 
     # Initialize chat history

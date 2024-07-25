@@ -21,7 +21,7 @@ Upon receiving the github repository url, RepoGPT will crawl documents inside th
 Install dependencies.
 
 ```python
-pip install -r requirement.txt
+pip install -r requirement.md
 ```
 
 Create .env file and append the followling lines:
