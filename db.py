@@ -5,24 +5,22 @@ from crawl import *
 from langchain_community.vectorstores.chroma import Chroma
 
 
-def get_vectordb(
-    openai_api_key, owner, repo, github_token=None, persist_directory=None
-):
+def get_vectordb(openai_api_key, repo_path, persist_directory):
     embedding = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
     if persist_directory is None:
-        persist_directory = "/repo-gpt_persist_test2"
+        persist_directory = "/repo_chroma"
 
     if os.path.exists(persist_directory):
         shutil.rmtree(persist_directory)  # remove the directory and its contents
 
-    file_paths = crawl_repo(owner, repo, github_token)
+    file_paths = crawl_local_repo(repo_path)
 
     from langchain.docstore.document import Document
 
     documents = [
         Document(
-            page_content=fetch_file_content(owner, repo, path, github_token),
+            page_content=read_file_content(path),
             metadata={"file_path": path},
         )
         for path in file_paths
@@ -37,12 +35,10 @@ def get_vectordb(
     return vectordb
 
 
-def load_vector_db(
-    openai_api_key, owner, repo, github_token=None, persist_directory=None
-):
-
+def load_vector_db(openai_api_key, persist_directory):
     if not os.path.exists(persist_directory):
         print(f"Persist directory {persist_directory} does not exist.")
+        return None
 
     embedding = OpenAIEmbeddings(openai_api_key=openai_api_key)
     vectordb = Chroma(
