@@ -111,6 +111,46 @@ def get_repo_contents(owner, repo, path="", github_token=None):
     return response.json()
 
 
+def crawl_local_repo(repo_path, rel_path=False):
+    all_files = []
+    for root, dirs, files in os.walk(repo_path):
+        # print(root, dirs, files)
+        # Filter out directories starting with '.' and filter out "pycache"
+        dirs[:] = [d for d in dirs if not d.startswith(".") and not d.startswith("_")]
+
+        for file in files:
+            if file.startswith(".") or file.startswith("_") or file in ["LICENSE"]:
+                continue
+            if any(
+                file.endswith(ext)
+                for ext in [
+                    ".exe",
+                    ".dll",
+                    ".so",
+                    ".o",
+                    ".a",
+                    ".dylib",
+                    ".class",
+                    ".jar",
+                    ".war",
+                    ".log",
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                    ".gif",
+                    ".svg",
+                    ".ico",
+                ]
+            ):
+                continue
+            path = os.path.join(root, file)
+            if rel_path:
+                path = path.replace(repo_path, "")
+            all_files.append(path)
+
+    return all_files
+
+
 def crawl_repo(owner, repo, github_token=None):
     all_files = []
 
@@ -144,13 +184,13 @@ def fetch_file_content(file_path: str):
     return base64.b64decode(content).decode("utf-8")
 
 
-def read_file_content(file_path: str):
-    print(f"Reading file: {file_path}")
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
+def read_file_content(file_path):
+    def read_file_content(path):
+        with open(path, "rb") as file:
+            raw_data = file.read()
+            result = chardet.detect(raw_data)
+            encoding = result["encoding"]
+
+        with open(path, "r", encoding=encoding) as file:
             content = file.read()
-    except UnicodeDecodeError:
-        Warning(f"Could not read file {file_path} due to encoding issues.")
-    except Exception as e:
-        Warning(f"An error occurred while reading the file {file_path}: {e}")
-    return content
+        return content

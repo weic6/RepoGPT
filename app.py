@@ -1,3 +1,9 @@
+__import__("pysqlite3")
+import pysqlite3
+import sys
+
+sys.modules["sqlite3"] = sys.modules["pysqlite3"]
+import chromadb
 import streamlit as st
 from streamlit_folium import st_folium
 import os
@@ -10,7 +16,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
-persist_directory = os.getenv("CHROMA_DIR")
+# persist_directory = os.getenv("CHROMA_DIR")
 
 
 def main():
@@ -36,13 +42,11 @@ def main():
             "Chat with GPT, RAG and Memory",
         ],
     )
-
-    # example_path = "/Users/wei/Misc/Media-Transport-Library"
-    example_path = "/Users/wei/Misc/RepoGPT-for-test"
-
+    # example_repo_path = "/Users/wei/Misc/Media-Transport-Library"
+    example_repo_path = "/Users/wei/Misc/RepoGPT-for-test"
     repo_path = st.sidebar.text_input(
-        "Enter local repository path",
-        value=example_path,
+        "Enter your local repository path...",
+        value=example_repo_path,
     )
 
     if not repo_path or not os.path.isdir(repo_path):
@@ -70,28 +74,30 @@ def main():
             st.sidebar.write("Loaded vectordb complete.")
             st.session_state["vectordb"] = vectordb
         else:
-            st.sidebar.error("Failed to load vectordb.")
+            st.session_state["show_files"] = not st.session_state["show_files"]
+    if st.session_state.get("show_files", False):
+        for file_path in file_paths:
+            # st.sidebar.write(f"https://github.com/{owner}/{repo}/blob/main/{file_path}")
+            st.sidebar.write(file_path)
 
-    chroma_dir_name = st.sidebar.text_input(
-        "Enter the name of persist directory", value="chroma3"
-    )
-    # chroma_dir_name = os.path.basename(repo_path) + "_" + chroma_dir_name
-    # persist_directory = os.path.join(os.path.dirname(repo_path), chroma_dir_name)
-
-    if st.sidebar.button("Create new chroma persist db"):
-        persist_directory = os.path.join(repo_path, "_" + chroma_dir_name)
-
-        if os.path.exists(persist_directory):
-            st.sidebar.warning(
-                "Persist directory already exists. Are you sure you want to overwrite it?"
+    if st.sidebar.button("Select persist chroma db"):
+        if persist_directory := st.sidebar.text_input("Directory to chroma db"):
+            st.session_state["persist_directory"] = persist_directory
+            vectordb = load_vector_db(
+                openai_api_key,
+                st.session_state["persist_directory"],
             )
-            # return
-            # if not st.sidebar.button("Overwrite it."):  # this is not working for now
-            #     return
-
-        st.sidebar.write(f"Vectorizing the documents in {persist_directory}...")
-        vectordb = get_vectordb(openai_api_key, repo_path, persist_directory)
-        st.sidebar.write("Vectorization complete.")
+            st.sidebar.write("Chroma db loaded successfully!")
+            st.session_state["vectordb"] = vectordb
+    elif st.sidebar.button("Create persist chroma db"):
+        st.session_state["persist_directory"] = os.path.join(repo_path, "_chroma")
+        st.sidebar.write("Vectorizing the documents...")
+        vectordb = get_vectordb(
+            openai_api_key,
+            repo_path,
+            st.session_state["persist_directory"],
+        )
+        st.sidebar.write("Chroma db created successfully!")
         st.session_state["vectordb"] = vectordb
 
     # Initialize chat history
